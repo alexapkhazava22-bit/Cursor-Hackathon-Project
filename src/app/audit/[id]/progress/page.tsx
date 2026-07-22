@@ -10,21 +10,23 @@ import {
   runAuditPipeline,
 } from "@/lib/audit/pipeline";
 import type { AuditRecord } from "@/lib/types";
-
-const STEPS = [
-  "Payment confirmed",
-  "Running axe-core audit",
-  "Generating AI explanations",
-  "Creating canonical report",
-  "Calculating SHA-256 hash",
-];
+import { useI18n } from "@/lib/i18n/context";
 
 export default function ProgressPage() {
+  const { t } = useI18n();
   const params = useParams<{ id: string }>();
   const router = useRouter();
   const [audit, setAudit] = useState<AuditRecord | null>(null);
   const [step, setStep] = useState(0);
   const [error, setError] = useState<string | null>(null);
+
+  const steps = [
+    t("stepPaymentConfirmed"),
+    t("stepRunningAudit"),
+    t("stepAi"),
+    t("stepCanonical"),
+    t("stepHash"),
+  ];
 
   useEffect(() => {
     const found = getAudit(params.id);
@@ -100,9 +102,9 @@ export default function ProgressPage() {
   if (!audit) {
     return (
       <div className="mx-auto max-w-xl px-4 py-16">
-        <p>აუდიტი ვერ მოიძებნა.</p>
+        <p>{t("auditNotFound")}</p>
         <Button asChild className="mt-4">
-          <Link href="/audit/new">ახალი აუდიტი</Link>
+          <Link href="/audit/new">{t("navNewAudit")}</Link>
         </Button>
       </div>
     );
@@ -110,12 +112,10 @@ export default function ProgressPage() {
 
   return (
     <div className="mx-auto max-w-xl px-4 py-16 sm:px-6">
-      <h1 className="display text-4xl text-[var(--ink)]">აუდიტი მიმდინარეობს</h1>
-      <p className="mt-2 text-[var(--muted)]">
-        Deterministic axe-core · AI explanation · canonical SHA-256
-      </p>
+      <h1 className="display text-4xl text-[var(--ink)]">{t("progressTitle")}</h1>
+      <p className="mt-2 text-[var(--muted)]">{t("progressSupport")}</p>
       <ul className="mt-8 space-y-3">
-        {STEPS.map((label, i) => (
+        {steps.map((label, i) => (
           <li
             key={label}
             className={`flex items-center gap-3 rounded-lg border px-4 py-3 text-sm ${
@@ -135,7 +135,7 @@ export default function ProgressPage() {
         <div className="mt-6 text-sm text-[var(--danger)]">
           <p>{error}</p>
           <Button asChild className="mt-3" variant="secondary">
-            <Link href={`/audit/${audit.auditId}/payment`}>Back to payment</Link>
+            <Link href={`/audit/${audit.auditId}/payment`}>{t("backToPayment")}</Link>
           </Button>
         </div>
       )}

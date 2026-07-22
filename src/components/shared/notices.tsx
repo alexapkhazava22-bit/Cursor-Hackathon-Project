@@ -1,17 +1,20 @@
-import { LIMITATION_NOTICE_KA } from "@/lib/types";
+"use client";
+
+import { LimitationNotice as BaseNotice, DemoModeBanner as BaseDemo } from "@/components/shared/notices-base";
+import { useI18n } from "@/lib/i18n/context";
 
 export function LimitationNotice({ className = "" }: { className?: string }) {
-  return (
-    <aside className={`limit-banner rounded-r-lg px-4 py-3 text-sm ${className}`}>
-      {LIMITATION_NOTICE_KA}
-    </aside>
-  );
+  const { t } = useI18n();
+  return <BaseNotice className={className} text={t("limitationNotice")} />;
 }
 
 export function DemoModeBanner({ label }: { label: string }) {
+  const { t } = useI18n();
   return (
-    <div className="rounded-lg border border-dashed border-[var(--accent)] bg-[var(--accent-soft)] px-4 py-2 text-sm text-[var(--ink)]">
-      <strong>DEMO_MODE:</strong> {label} — არ არის რეალური blockchain ვერიფიკაცია.
-    </div>
+    <BaseDemo
+      prefix={t("demoModePrefix")}
+      label={label}
+      suffix={t("demoModeNotReal")}
+    />
   );
 }

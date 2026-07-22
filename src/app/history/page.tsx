@@ -7,8 +7,10 @@ import { Badge } from "@/components/ui/badge";
 import { listAudits, resetAllAudits, saveAudit } from "@/lib/storage/audit-store";
 import { formatDateKa } from "@/lib/utils/cn";
 import type { AuditRecord } from "@/lib/types";
+import { useI18n } from "@/lib/i18n/context";
 
 export default function HistoryPage() {
+  const { t } = useI18n();
   const [ready, setReady] = useState(false);
   const [audits, setAudits] = useState<AuditRecord[]>([]);
   const [busy, setBusy] = useState(false);
@@ -43,14 +45,12 @@ export default function HistoryPage() {
     <div className="mx-auto max-w-4xl px-4 py-12 sm:px-6">
       <div className="flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
         <div>
-          <h1 className="display text-4xl text-[var(--ink)]">აუდიტების ისტორია</h1>
-          <p className="mt-2 text-[var(--muted)]">
-            ლოკალური შენახვა ამ მოწყობილობაზე (localStorage).
-          </p>
+          <h1 className="display text-4xl text-[var(--ink)]">{t("historyTitle")}</h1>
+          <p className="mt-2 text-[var(--muted)]">{t("historySupport")}</p>
         </div>
         <div className="flex flex-wrap gap-2">
           <Button asChild>
-            <Link href="/audit/new">ახალი აუდიტი</Link>
+            <Link href="/audit/new">{t("navNewAudit")}</Link>
           </Button>
           <Button
             type="button"
@@ -58,29 +58,29 @@ export default function HistoryPage() {
             disabled={busy}
             onClick={() => void loadSample()}
           >
-            {busy ? "Loading…" : "Use sample audit"}
+            {busy ? t("loading") : t("useSampleAudit")}
           </Button>
           <Button type="button" variant="outline" onClick={resetDemo}>
-            Reset demo
+            {t("resetDemo")}
           </Button>
         </div>
       </div>
 
       <ul className="mt-8 space-y-3">
         {!ready && (
-          <li className="rounded-xl border border-[var(--line)] bg-white/70 p-6 text-[var(--muted)]">
-            იტვირთება…
+          <li className="ac-surface rounded-xl border border-[var(--line)] p-6 text-[var(--muted)]">
+            {t("loading")}
           </li>
         )}
         {ready && audits.length === 0 && (
-          <li className="rounded-xl border border-dashed border-[var(--line)] bg-white/70 p-6 text-[var(--muted)]">
-            ჯერ არ არის აუდიტი. დაიწყეთ ახალი ან ჩატვირთეთ sample audit.
+          <li className="ac-surface rounded-xl border border-dashed border-[var(--line)] p-6 text-[var(--muted)]">
+            {t("historyEmpty")}
           </li>
         )}
         {audits.map((a) => (
           <li
             key={a.auditId}
-            className="flex flex-col gap-3 rounded-xl border border-[var(--line)] bg-white/90 p-4 sm:flex-row sm:items-center sm:justify-between"
+            className="ac-surface flex flex-col gap-3 rounded-xl border border-[var(--line)] p-4 sm:flex-row sm:items-center sm:justify-between"
           >
             <div>
               <p className="font-semibold">{a.meta.url}</p>
@@ -103,10 +103,10 @@ export default function HistoryPage() {
             </div>
             <div className="flex flex-wrap gap-2">
               <Button asChild size="sm" variant="secondary">
-                <Link href={`/audit/${a.auditId}/report`}>Report</Link>
+                <Link href={`/audit/${a.auditId}/report`}>{t("report")}</Link>
               </Button>
               <Button asChild size="sm" variant="outline">
-                <Link href={`/verify/${a.auditId}`}>Verify</Link>
+                <Link href={`/verify/${a.auditId}`}>{t("verify")}</Link>
               </Button>
             </div>
           </li>

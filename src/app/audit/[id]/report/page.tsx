@@ -20,8 +20,10 @@ import { explorerTxUrl, getFeatureFlags, getSolanaConfig } from "@/lib/config";
 import { formatDateKa, shortAddress } from "@/lib/utils/cn";
 import { MockAIProvider } from "@/lib/ai/provider";
 import type { AuditRecord } from "@/lib/types";
+import { useI18n } from "@/lib/i18n/context";
 
 export default function ReportPage() {
+  const { t } = useI18n();
   const params = useParams<{ id: string }>();
   const flags = getFeatureFlags();
   const config = getSolanaConfig();
@@ -135,7 +137,7 @@ export default function ReportPage() {
   if (!ready) {
     return (
       <div className="mx-auto max-w-xl px-4 py-16">
-        <p className="text-[var(--muted)]">ანგარიში იტვირთება…</p>
+        <p className="text-[var(--muted)]">{t("reportLoading")}</p>
       </div>
     );
   }
@@ -143,9 +145,9 @@ export default function ReportPage() {
   if (!audit || !audit.auditResult) {
     return (
       <div className="mx-auto max-w-xl px-4 py-16">
-        <p>ანგარიში ჯერ არ არის მზად.</p>
+        <p>{t("reportNotReady")}</p>
         <Button asChild className="mt-4">
-          <Link href="/audit/new">ახალი აუდიტი</Link>
+          <Link href="/audit/new">{t("navNewAudit")}</Link>
         </Button>
       </div>
     );
@@ -158,7 +160,7 @@ export default function ReportPage() {
       <header className="flex flex-col gap-4 border-b border-[var(--line)] pb-6 lg:flex-row lg:items-end lg:justify-between">
         <div>
           <p className="text-sm font-semibold uppercase tracking-[0.18em] text-[var(--accent)]">
-            AccessChain Report
+            {t("reportTitle")}
           </p>
           <h1 className="display mt-1 text-3xl text-[var(--ink)] sm:text-4xl">
             {audit.meta.url}
@@ -170,14 +172,14 @@ export default function ReportPage() {
             {(audit.payment?.status === "confirmed" ||
               audit.payment?.status === "demo_mock") && (
               <Badge className="bg-[var(--brand-soft)] text-[var(--brand)]">
-                Payment verified{audit.payment.isDemoMock ? " (demo)" : ""}
+                {t("paymentVerified")}{audit.payment.isDemoMock ? " (demo)" : ""}
               </Badge>
             )}
             {(audit.attestation?.status === "confirmed" ||
               audit.attestation?.status === "demo_mock" ||
               audit.state === "VERIFIED") && (
               <Badge className="bg-[var(--accent-soft)] text-[var(--warn)]">
-                Solana anchored{audit.attestation?.isDemoMock ? " (demo)" : ""}
+                {t("solanaAnchored")}{audit.attestation?.isDemoMock ? " (demo)" : ""}
               </Badge>
             )}
           </div>
@@ -188,7 +190,7 @@ export default function ReportPage() {
               href={`/audit/${audit.auditId}/developer`}
               prefetch={false}
             >
-              Developer Fix Plan
+              {t("developerFixPlan")}
             </Link>
           </Button>
           <Button asChild>
@@ -222,7 +224,7 @@ export default function ReportPage() {
         <p className="mt-4 text-sm text-[var(--muted)]">
           {audit.auditResult.healthScoreLabel}:{" "}
           <strong className="text-[var(--ink)]">{audit.auditResult.healthScore}</strong>
-          {" "}(transparent formula from automated findings only — not an official score)
+          {" "}{t("healthScoreNote")}
         </p>
       )}
 
@@ -231,10 +233,10 @@ export default function ReportPage() {
       <Tabs.Root defaultValue="owner" className="mt-8">
         <Tabs.List className="flex flex-wrap gap-2 border-b border-[var(--line)] pb-2">
           {[
-            ["owner", "ბიზნესისთვის"],
-            ["dev", "დეველოპერისთვის"],
-            ["tech", "ტექნიკური შედეგები"],
-            ["solana", "Solana მტკიცებულება"],
+            ["owner", t("tabOwner")],
+            ["dev", t("tabDev")],
+            ["tech", t("tabTech")],
+            ["solana", t("tabSolana")],
           ].map(([v, label]) => (
             <Tabs.Trigger
               key={v}
@@ -248,7 +250,7 @@ export default function ReportPage() {
 
         <Tabs.Content value="owner" className="mt-6 space-y-4">
           <p className="text-xs text-[var(--muted)]">
-            AI-generated explanation · based only on deterministic axe-core violations
+            {t("aiExplanationNote")}
           </p>
           {explained.map((issue) => (
             <article
@@ -258,19 +260,19 @@ export default function ReportPage() {
               <Badge className="bg-[var(--brand-soft)] text-[var(--brand)]">
                 {issue.impact}
               </Badge>
-              <h3 className="display mt-2 text-xl">რა პრობლემაა?</h3>
+              <h3 className="display mt-2 text-xl">{t("whatProblem")}</h3>
               <p className="mt-1">{issue.owner.problemKa}</p>
-              <h4 className="mt-4 font-semibold">ვის ეხება?</h4>
+              <h4 className="mt-4 font-semibold">{t("whoAffected")}</h4>
               <p>{issue.owner.whoAffectedKa}</p>
-              <h4 className="mt-4 font-semibold">ბიზნესზე რა გავლენა აქვს?</h4>
+              <h4 className="mt-4 font-semibold">{t("businessImpact")}</h4>
               <p>{issue.owner.businessImpactKa}</p>
-              <h4 className="mt-4 font-semibold">რამდენად პრიორიტეტულია?</h4>
+              <h4 className="mt-4 font-semibold">{t("howPriority")}</h4>
               <p>
-                {issue.owner.priorityKa} · სირთულე: {issue.owner.difficultyKa}
+                {issue.owner.priorityKa} · {t("difficulty")}: {issue.owner.difficultyKa}
               </p>
-              <h4 className="mt-4 font-semibold">რა უთხრას დეველოპერს?</h4>
+              <h4 className="mt-4 font-semibold">{t("askDeveloper")}</h4>
               <p>{issue.owner.askDeveloperKa}</p>
-              <h4 className="mt-4 font-semibold">როგორ შევამოწმო გამოსწორება?</h4>
+              <h4 className="mt-4 font-semibold">{t("howRetest")}</h4>
               <p>{issue.owner.retestKa}</p>
             </article>
           ))}
@@ -296,14 +298,14 @@ export default function ReportPage() {
                 </p>
               )}
               <p className="mt-3">{issue.developer.technicalCause}</p>
-              <h4 className="mt-4 font-semibold">Suggested fix</h4>
+              <h4 className="mt-4 font-semibold">{t("suggestedFix")}</h4>
               <p>{issue.developer.suggestedFix}</p>
               {issue.developer.codeExample && (
                 <pre className="mt-3 overflow-x-auto rounded-lg bg-[#0f1c1e] p-3 text-xs text-white">
                   {issue.developer.codeExample}
                 </pre>
               )}
-              <h4 className="mt-4 font-semibold">Acceptance criteria</h4>
+              <h4 className="mt-4 font-semibold">{t("acceptanceCriteria")}</h4>
               <ul className="list-disc space-y-1 pl-5 text-sm">
                 {issue.developer.acceptanceCriteria.map((c) => (
                   <li key={c}>{c}</li>
@@ -321,7 +323,7 @@ export default function ReportPage() {
         <Tabs.Content value="tech" className="mt-6 space-y-4">
           <p className="text-sm text-[var(--muted)]">
             Deterministic audit result · {audit.auditResult.engineName}{" "}
-            {audit.auditResult.engineVersion} · passed checks:{" "}
+            {audit.auditResult.engineVersion} · {t("techPassed")}:{" "}
             {audit.auditResult.passes}
           </p>
           {audit.auditResult.violations.map((v) => (
@@ -342,7 +344,7 @@ export default function ReportPage() {
               )}
               {v.helpUrl && (
                 <a className="mt-2 inline-block underline" href={v.helpUrl} target="_blank" rel="noreferrer">
-                  Help URL
+                  {t("helpUrl")}
                 </a>
               )}
             </article>
@@ -351,29 +353,29 @@ export default function ReportPage() {
 
         <Tabs.Content value="solana" className="mt-6 space-y-4">
           {(audit.payment?.isDemoMock || audit.attestation?.isDemoMock) && (
-            <DemoModeBanner label="Mock payment/attestation" />
+            <DemoModeBanner label={t("mockPaymentAttestation")} />
           )}
           <dl className="grid gap-3 rounded-xl border border-[var(--line)] bg-white/90 p-5 text-sm sm:grid-cols-2">
             <div>
-              <dt className="text-[var(--muted)]">Connected / payer wallet</dt>
+              <dt className="text-[var(--muted)]">{t("connectedWallet")}</dt>
               <dd className="font-mono">
                 {shortAddress(audit.payment?.payer ?? wallet.address ?? "—", 6)}
               </dd>
             </div>
             <div>
-              <dt className="text-[var(--muted)]">Network</dt>
+              <dt className="text-[var(--muted)]">{t("network")}</dt>
               <dd>Solana Devnet</dd>
             </div>
             <div>
-              <dt className="text-[var(--muted)]">Audit price</dt>
+              <dt className="text-[var(--muted)]">{t("auditPrice")}</dt>
               <dd>{config.priceSol} SOL</dd>
             </div>
             <div>
-              <dt className="text-[var(--muted)]">Payment status</dt>
+              <dt className="text-[var(--muted)]">{t("paymentStatus")}</dt>
               <dd>{audit.payment?.status ?? "—"}</dd>
             </div>
             <div className="sm:col-span-2">
-              <dt className="text-[var(--muted)]">Payment signature</dt>
+              <dt className="text-[var(--muted)]">{t("paymentSignature")}</dt>
               <dd className="break-all font-mono text-xs">
                 {audit.payment?.signature ?? "—"}
                 {audit.payment?.signature && !audit.payment.isDemoMock && (
@@ -387,15 +389,15 @@ export default function ReportPage() {
               </dd>
             </div>
             <div className="sm:col-span-2">
-              <dt className="text-[var(--muted)]">Report SHA-256</dt>
+              <dt className="text-[var(--muted)]">{t("reportSha")}</dt>
               <dd className="break-all font-mono text-xs">{audit.currentHash ?? "—"}</dd>
             </div>
             <div>
-              <dt className="text-[var(--muted)]">Attestation status</dt>
+              <dt className="text-[var(--muted)]">{t("attestationStatus")}</dt>
               <dd>{audit.attestation?.status ?? audit.state}</dd>
             </div>
             <div className="sm:col-span-2">
-              <dt className="text-[var(--muted)]">Attestation signature</dt>
+              <dt className="text-[var(--muted)]">{t("attestationSignature")}</dt>
               <dd className="break-all font-mono text-xs">
                 {audit.attestation?.signature ?? "—"}
                 {audit.attestation?.signature && !audit.attestation.isDemoMock && (
@@ -415,13 +417,12 @@ export default function ReportPage() {
           !audit.attestation ? (
             <div className="space-y-3 rounded-xl border border-[var(--line)] bg-[var(--brand-soft)] p-5">
               <p className="text-sm">
-                ეს მოქმედება Solana-ზე დააფიქსირებს ანგარიშის ციფრულ ანაბეჭდს.
-                სრული ანგარიში საჯაროდ არ აიტვირთება.
+                {t("attestExplain")}
               </p>
               <div className="flex flex-wrap gap-2">
                 {!wallet.address && (
                   <Button type="button" variant="secondary" onClick={() => void wallet.connect()}>
-                    Connect Wallet
+                    {t("connectWallet")}
                   </Button>
                 )}
                 <Button
@@ -429,11 +430,11 @@ export default function ReportPage() {
                   onClick={() => void anchorHash()}
                   disabled={attestBusy || !flags.enableSolana}
                 >
-                  {attestBusy ? "Anchoring…" : "Anchor hash on Solana"}
+                  {attestBusy ? t("anchoring") : t("anchorHash")}
                 </Button>
                 {flags.demoMode && (
                   <Button type="button" variant="outline" onClick={demoAttest}>
-                    Use demo attestation
+                    {t("useDemoAttestation")}
                   </Button>
                 )}
               </div>
@@ -443,7 +444,7 @@ export default function ReportPage() {
             </div>
           ) : (
             <Button asChild variant="secondary">
-              <Link href={`/verify/${audit.auditId}`}>Reverify on Solana</Link>
+              <Link href={`/verify/${audit.auditId}`}>{t("reverifySolana")}</Link>
             </Button>
           )}
         </Tabs.Content>

@@ -18,8 +18,10 @@ import {
 } from "@/lib/solana/payment";
 import { attachPayment, moveToPayment } from "@/lib/audit/pipeline";
 import type { AuditRecord, PaymentRecord } from "@/lib/types";
+import { useI18n } from "@/lib/i18n/context";
 
 export default function PaymentPage() {
+  const { t } = useI18n();
   const params = useParams<{ id: string }>();
   const router = useRouter();
   const flags = getFeatureFlags();
@@ -166,7 +168,7 @@ export default function PaymentPage() {
   if (!ready) {
     return (
       <div className="mx-auto max-w-xl px-4 py-16">
-        <p className="text-[var(--muted)]">იტვირთება…</p>
+        <p className="text-[var(--muted)]">{t("loading")}</p>
       </div>
     );
   }
@@ -174,9 +176,9 @@ export default function PaymentPage() {
   if (!audit) {
     return (
       <div className="mx-auto max-w-xl px-4 py-16">
-        <p>აუდიტი ვერ მოიძებნა.</p>
+        <p>{t("auditNotFound")}</p>
         <Button asChild className="mt-4">
-          <Link href="/audit/new">ახალი აუდიტი</Link>
+          <Link href="/audit/new">{t("navNewAudit")}</Link>
         </Button>
       </div>
     );
@@ -184,39 +186,39 @@ export default function PaymentPage() {
 
   return (
     <div className="mx-auto max-w-2xl px-4 py-12 sm:px-6">
-      <h1 className="display text-4xl text-[var(--ink)]">საფულე და გადახდა</h1>
+      <h1 className="display text-4xl text-[var(--ink)]">{t("paymentTitle")}</h1>
       <p className="mt-2 text-[var(--muted)]">
-        Phantom-compatible Wallet Standard · მხოლოდ Solana Devnet
+        {t("paymentSupport")}
       </p>
 
       {flags.demoMode && (
         <div className="mt-4">
-          <DemoModeBanner label="შეგიძლიათ გამოიყენოთ დემო საფულის ნაკადი" />
+          <DemoModeBanner label={t("demoWalletHint")} />
         </div>
       )}
 
       <div className="mt-6 space-y-3 rounded-xl border border-[var(--line)] bg-white/90 p-5">
-        <h2 className="display text-xl">ხელმოწერამდე</h2>
+        <h2 className="display text-xl">{t("beforeSigning")}</h2>
         {preview && (
           <dl className="grid gap-2 text-sm">
             <div className="flex justify-between gap-4">
-              <dt className="text-[var(--muted)]">Action</dt>
+              <dt className="text-[var(--muted)]">{t("action")}</dt>
               <dd className="font-medium">{preview.action}</dd>
             </div>
             <div className="flex justify-between gap-4">
-              <dt className="text-[var(--muted)]">Amount</dt>
+              <dt className="text-[var(--muted)]">{t("amount")}</dt>
               <dd className="font-medium">{formatSol(preview.amountSol)}</dd>
             </div>
             <div className="flex justify-between gap-4">
-              <dt className="text-[var(--muted)]">Recipient</dt>
+              <dt className="text-[var(--muted)]">{t("recipient")}</dt>
               <dd className="font-mono text-xs">{shortAddress(preview.recipient || "—", 6)}</dd>
             </div>
             <div className="flex justify-between gap-4">
-              <dt className="text-[var(--muted)]">Network</dt>
+              <dt className="text-[var(--muted)]">{t("network")}</dt>
               <dd className="font-medium">{preview.network}</dd>
             </div>
             <div className="flex justify-between gap-4">
-              <dt className="text-[var(--muted)]">Audit request ID</dt>
+              <dt className="text-[var(--muted)]">{t("auditRequestId")}</dt>
               <dd className="font-mono text-xs">{preview.auditRequestId}</dd>
             </div>
             <p className="pt-2 text-[var(--muted)]">{preview.consequenceKa}</p>
@@ -225,37 +227,37 @@ export default function PaymentPage() {
       </div>
 
       <div className="mt-6 space-y-3 rounded-xl border border-[var(--line)] bg-white/90 p-5">
-        <h2 className="display text-xl">Wallet</h2>
+        <h2 className="display text-xl">{t("wallet")}</h2>
         {!wallet.phantomInstalled && wallet.ready && (
           <p className="text-sm text-[var(--warn)]">
-            Phantom არ არის დაყენებული. დააინსტალირეთ ან გამოიყენეთ დემო ნაკადი.
+            {t("phantomMissing")}
           </p>
         )}
         {wallet.address ? (
           <div className="text-sm">
             <p>
-              მისამართი:{" "}
+              {t("address")}:{" "}
               <span className="font-mono">{shortAddress(wallet.address, 6)}</span>
             </p>
             <p className="mt-1">
-              ბალანსი:{" "}
+              {t("balance")}:{" "}
               {wallet.balanceSol === null
                 ? "—"
                 : formatSol(wallet.balanceSol)}
             </p>
             {wallet.wrongNetwork && (
               <p className="mt-2 text-[var(--danger)]">
-                Wrong network — გადართეთ Solana Devnet-ზე.
+                {t("wrongNetwork")}
               </p>
             )}
             {wallet.insufficientBalance(config.priceSol) && (
               <p className="mt-2 text-[var(--danger)]">
-                არასაკმარისი Devnet SOL. მოითხოვეთ airdrop ან გამოიყენეთ დემო ნაკადი.
+                {t("insufficientSol")}
               </p>
             )}
             <div className="mt-3 flex flex-wrap gap-2">
               <Button type="button" variant="secondary" onClick={() => void wallet.disconnect()}>
-                Disconnect
+                {t("disconnect")}
               </Button>
               <Button
                 type="button"
@@ -268,17 +270,17 @@ export default function PaymentPage() {
                 }
               >
                 {status === "simulating"
-                  ? "Simulation…"
+                  ? t("simulating")
                   : status === "pending"
-                    ? "Pending…"
-                    : `გადაიხადე ${formatSol(config.priceSol)}`}
+                    ? t("pending")
+                    : `${t("pay")} ${formatSol(config.priceSol)}`}
               </Button>
             </div>
           </div>
         ) : (
           <div className="flex flex-wrap gap-2">
             <Button type="button" onClick={() => void wallet.connect()} disabled={wallet.connecting}>
-              {wallet.connecting ? "Connecting…" : "Connect Wallet"}
+              {wallet.connecting ? t("connecting") : t("connectWallet")}
             </Button>
           </div>
         )}
@@ -290,17 +292,17 @@ export default function PaymentPage() {
       {flags.demoMode && (
         <div className="mt-4">
           <Button type="button" variant="outline" onClick={useDemoWalletFlow}>
-            Use demo wallet flow
+            {t("useDemoWallet")}
           </Button>
         </div>
       )}
 
       {status === "failed" && (
         <div className="mt-4 rounded-lg border border-[var(--danger)]/30 bg-red-50 p-4 text-sm">
-          <p className="font-semibold text-[var(--danger)]">გადახდა ჩაიშალა</p>
+          <p className="font-semibold text-[var(--danger)]">{t("paymentFailed")}</p>
           <p className="mt-1">{error}</p>
           <Button type="button" className="mt-3" variant="secondary" onClick={() => void payWithWallet()}>
-            Retry payment
+            {t("retryPayment")}
           </Button>
         </div>
       )}

@@ -8,8 +8,10 @@ import { Badge } from "@/components/ui/badge";
 import { getAudit, saveAudit } from "@/lib/storage/audit-store";
 import { MockAIProvider } from "@/lib/ai/provider";
 import type { AuditRecord } from "@/lib/types";
+import { useI18n } from "@/lib/i18n/context";
 
 export default function DeveloperFixPlanPage() {
+  const { t } = useI18n();
   const params = useParams<{ id: string }>();
   const auditId = typeof params.id === "string" ? params.id : "";
   const [audit, setAudit] = useState<AuditRecord | null>(null);
@@ -65,7 +67,7 @@ export default function DeveloperFixPlanPage() {
         <p className="text-[var(--danger)]">{error}</p>
         <Button asChild className="mt-4" variant="secondary">
           <Link href={`/audit/${auditId}/report`} prefetch={false}>
-            უკან ანგარიშზე
+            {t("backToReport")}
           </Link>
         </Button>
       </div>
@@ -75,10 +77,10 @@ export default function DeveloperFixPlanPage() {
   if (!audit?.explanations) {
     return (
       <div className="mx-auto max-w-xl px-4 py-16">
-        <p>Developer fix plan ჯერ არ არის მზად.</p>
+        <p>{t("fixPlanNotReady")}</p>
         <Button asChild className="mt-4">
           <Link href={auditId ? `/audit/${auditId}/report` : "/history"} prefetch={false}>
-            უკან ანგარიშზე
+            {t("backToReport")}
           </Link>
         </Button>
       </div>
@@ -88,11 +90,11 @@ export default function DeveloperFixPlanPage() {
   return (
     <div className="mx-auto max-w-4xl px-4 py-10 sm:px-6">
       <p className="text-sm font-semibold uppercase tracking-[0.18em] text-[var(--accent)]">
-        Developer Fix Plan
+        {t("developerFixPlan")}
       </p>
-      <h1 className="display mt-2 text-4xl text-[var(--ink)]">ტექნიკური დავალებები</h1>
+      <h1 className="display mt-2 text-4xl text-[var(--ink)]">{t("developerTitle")}</h1>
       <p className="mt-2 text-[var(--muted)]">
-        Affected URL: {audit.meta.url} · მხოლოდ axe-core violations
+        {t("affectedUrl")}: {audit.meta.url} · {t("developerSupport")}
       </p>
       <div className="mt-6 flex gap-2">
         <Button asChild variant="secondary">
@@ -122,44 +124,44 @@ export default function DeveloperFixPlanPage() {
                 {issue.developer.severity}
               </Badge>
             </div>
-            <h2 className="display mt-3 text-2xl">Affected element</h2>
+            <h2 className="display mt-3 text-2xl">{t("affectedElement")}</h2>
             <p className="mt-1 font-mono text-xs break-all">
               {issue.developer.affectedElement}
             </p>
             {issue.developer.selector && (
               <p className="mt-2 text-sm">
-                Selector:{" "}
+                {t("selector")}:{" "}
                 <code className="rounded bg-[var(--brand-soft)] px-1">
                   {issue.developer.selector}
                 </code>
               </p>
             )}
-            <h3 className="mt-4 font-semibold">Violated rule / WCAG</h3>
+            <h3 className="mt-4 font-semibold">{t("violatedRule")}</h3>
             <p className="text-sm">
               {issue.ruleId}
               {issue.developer.wcagReference
                 ? ` · ${issue.developer.wcagReference}`
                 : ""}
             </p>
-            <h3 className="mt-4 font-semibold">Technical explanation</h3>
+            <h3 className="mt-4 font-semibold">{t("technicalExplanation")}</h3>
             <p>{issue.developer.technicalCause}</p>
-            <h3 className="mt-4 font-semibold">Suggested fix</h3>
+            <h3 className="mt-4 font-semibold">{t("suggestedFix")}</h3>
             <p>{issue.developer.suggestedFix}</p>
             {issue.developer.codeExample && (
               <>
-                <h3 className="mt-4 font-semibold">Code example</h3>
+                <h3 className="mt-4 font-semibold">{t("codeExample")}</h3>
                 <pre className="mt-2 overflow-x-auto rounded-lg bg-[#0f1c1e] p-3 text-xs text-white">
                   {issue.developer.codeExample}
                 </pre>
               </>
             )}
-            <h3 className="mt-4 font-semibold">Acceptance criteria</h3>
+            <h3 className="mt-4 font-semibold">{t("acceptanceCriteria")}</h3>
             <ul className="list-disc space-y-1 pl-5 text-sm">
               {issue.developer.acceptanceCriteria.map((c) => (
                 <li key={c}>{c}</li>
               ))}
             </ul>
-            <h3 className="mt-4 font-semibold">Retesting steps</h3>
+            <h3 className="mt-4 font-semibold">{t("retestingSteps")}</h3>
             <ol className="list-decimal space-y-1 pl-5 text-sm">
               {issue.developer.retestingSteps.map((s) => (
                 <li key={s}>{s}</li>

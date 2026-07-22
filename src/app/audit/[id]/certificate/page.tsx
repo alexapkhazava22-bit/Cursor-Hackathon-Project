@@ -11,8 +11,10 @@ import { getAudit, saveAudit } from "@/lib/storage/audit-store";
 import { buildCertificateViewModel } from "@/lib/certificate/build";
 import { formatDateKa, shortAddress } from "@/lib/utils/cn";
 import type { AuditRecord } from "@/lib/types";
+import { useI18n } from "@/lib/i18n/context";
 
 export default function CertificatePage() {
+  const { t } = useI18n();
   const params = useParams<{ id: string }>();
   const [ready, setReady] = useState(false);
   const [audit, setAudit] = useState<AuditRecord | null>(null);
@@ -44,7 +46,7 @@ export default function CertificatePage() {
   if (!ready) {
     return (
       <div className="mx-auto max-w-xl px-4 py-16">
-        <p className="text-[var(--muted)]">სერტიფიკატი იტვირთება…</p>
+        <p className="text-[var(--muted)]">{t("certificateLoading")}</p>
       </div>
     );
   }
@@ -52,9 +54,9 @@ export default function CertificatePage() {
   if (!audit?.auditResult) {
     return (
       <div className="mx-auto max-w-xl px-4 py-16">
-        <p>სერტიფიკატი ჯერ არ არის მზად.</p>
+        <p>{t("certificateNotReady")}</p>
         <Button asChild className="mt-4">
-          <Link href="/audit/new">ახალი აუდიტი</Link>
+          <Link href="/audit/new">{t("navNewAudit")}</Link>
         </Button>
       </div>
     );
@@ -69,7 +71,7 @@ export default function CertificatePage() {
     <div className="mx-auto max-w-3xl px-4 py-10 sm:px-6">
       {vm.isDemoMock && (
         <div className="mb-4">
-          <DemoModeBanner label="Certificate includes demo mock chain evidence" />
+          <DemoModeBanner label={t("certificateDemoBanner")} />
         </div>
       )}
 
@@ -93,41 +95,41 @@ export default function CertificatePage() {
           <div className="space-y-3 text-sm">
             {vm.businessName && (
               <p>
-                <span className="text-[var(--muted)]">Business:</span>{" "}
+                <span className="text-[var(--muted)]">{t("business")}:</span>{" "}
                 <strong>{vm.businessName}</strong>
               </p>
             )}
             <p>
-              <span className="text-[var(--muted)]">Audited domain:</span>{" "}
+              <span className="text-[var(--muted)]">{t("auditedDomain")}:</span>{" "}
               <strong>{vm.auditedDomain}</strong>
             </p>
             <p>
-              <span className="text-[var(--muted)]">Audit ID:</span>{" "}
+              <span className="text-[var(--muted)]">{t("auditId")}:</span>{" "}
               <span className="font-mono text-xs">{vm.auditId}</span>
             </p>
             <p>
-              <span className="text-[var(--muted)]">Audit date:</span>{" "}
+              <span className="text-[var(--muted)]">{t("auditDate")}:</span>{" "}
               {formatDateKa(vm.auditDate)}
             </p>
             <p>
-              <span className="text-[var(--muted)]">Automated issues:</span>{" "}
+              <span className="text-[var(--muted)]">{t("automatedIssues")}:</span>{" "}
               {vm.issueSummary.total} (C{vm.issueSummary.critical}/S
               {vm.issueSummary.serious}/M{vm.issueSummary.moderate}/m
               {vm.issueSummary.minor})
             </p>
             <p>
-              <span className="text-[var(--muted)]">Report SHA-256:</span>
+              <span className="text-[var(--muted)]">{t("reportSha")}:</span>
               <br />
               <span className="break-all font-mono text-xs">{vm.reportHash}</span>
             </p>
             <p>
-              <span className="text-[var(--muted)]">Payer / attester:</span>{" "}
+              <span className="text-[var(--muted)]">{t("payerAttester")}:</span>{" "}
               <span className="font-mono text-xs">
                 {shortAddress(vm.payerWallet ?? "—", 6)}
               </span>
             </p>
             <p>
-              <span className="text-[var(--muted)]">Payment tx:</span>{" "}
+              <span className="text-[var(--muted)]">{t("paymentTx")}:</span>{" "}
               <span className="break-all font-mono text-xs">
                 {vm.paymentSignature ?? "—"}
               </span>
@@ -141,7 +143,7 @@ export default function CertificatePage() {
               )}
             </p>
             <p>
-              <span className="text-[var(--muted)]">Attestation tx:</span>{" "}
+              <span className="text-[var(--muted)]">{t("attestationTx")}:</span>{" "}
               <span className="break-all font-mono text-xs">
                 {vm.attestationSignature ?? "—"}
               </span>
@@ -162,7 +164,7 @@ export default function CertificatePage() {
               <img src={qr} alt="Verification QR code" className="rounded-lg border border-[var(--line)]" />
             )}
             <a className="text-xs underline" href={vm.verificationUrl}>
-              Verification URL
+              {t("verificationUrl")}
             </a>
           </div>
         </div>
@@ -170,19 +172,17 @@ export default function CertificatePage() {
         <div className="border-t border-[var(--line)] px-6 py-4 sm:px-8">
           <LimitationNotice />
           <p className="mt-3 text-xs text-[var(--muted)]">
-            Solana attestation proves report integrity and transaction history —
-            not that accessibility conclusions are correct. This is not a WCAG
-            Certified, Government Approved, or Official Compliance Certificate.
+            {t("certificateDisclaimer")}
           </p>
         </div>
       </article>
 
       <div className="mt-6 flex flex-wrap gap-2">
         <Button asChild variant="secondary">
-          <Link href={`/verify/${audit.auditId}`}>Open verification</Link>
+          <Link href={`/verify/${audit.auditId}`}>{t("openVerification")}</Link>
         </Button>
         <Button asChild variant="outline">
-          <Link href={`/audit/${audit.auditId}/report`}>Back to report</Link>
+          <Link href={`/audit/${audit.auditId}/report`}>{t("backToReport")}</Link>
         </Button>
       </div>
     </div>

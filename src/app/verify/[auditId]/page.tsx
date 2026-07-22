@@ -12,23 +12,23 @@ import { explorerTxUrl } from "@/lib/config";
 import { formatDateKa, shortAddress } from "@/lib/utils/cn";
 import type { AuditRecord } from "@/lib/types";
 import type { CertificateVerificationResult } from "@/lib/certificate/verify";
+import { useI18n } from "@/lib/i18n/context";
 
 const STATE_STYLES: Record<string, string> = {
-  Verified: "bg-emerald-100 text-emerald-800",
-  Modified: "bg-amber-100 text-amber-900",
-  Pending: "bg-sky-100 text-sky-900",
-  Unavailable: "bg-slate-100 text-slate-800",
-  Invalid: "bg-red-100 text-red-800",
+  Verified: "bg-emerald-100 text-emerald-800 dark:bg-emerald-900/40 dark:text-emerald-200",
+  Modified: "bg-amber-100 text-amber-900 dark:bg-amber-900/40 dark:text-amber-200",
+  Pending: "bg-sky-100 text-sky-900 dark:bg-sky-900/40 dark:text-sky-200",
+  Unavailable: "bg-slate-100 text-slate-800 dark:bg-slate-800 dark:text-slate-200",
+  Invalid: "bg-red-100 text-red-800 dark:bg-red-900/40 dark:text-red-200",
 };
 
 export default function VerifyPage() {
+  const { t } = useI18n();
   const params = useParams<{ auditId: string }>();
   const auditId = typeof params.auditId === "string" ? params.auditId : "";
   const [ready, setReady] = useState(false);
   const [audit, setAudit] = useState<AuditRecord | null>(null);
-  const [result, setResult] = useState<CertificateVerificationResult | null>(
-    null,
-  );
+  const [result, setResult] = useState<CertificateVerificationResult | null>(null);
   const [busy, setBusy] = useState(false);
   const [message, setMessage] = useState<string | null>(null);
 
@@ -38,15 +38,13 @@ export default function VerifyPage() {
     try {
       const res = await verifyCertificate(record);
       setResult(res);
-      setMessage(`განახლდა · ${res.state}`);
+      setMessage(`${t("updated")} · ${res.state}`);
     } catch (err) {
-      setMessage(
-        err instanceof Error ? err.message : "Verification failed",
-      );
+      setMessage(err instanceof Error ? err.message : "Verification failed");
     } finally {
       setBusy(false);
     }
-  }, []);
+  }, [t]);
 
   const loadAndVerify = useCallback(async () => {
     if (!auditId) return;
@@ -79,12 +77,11 @@ export default function VerifyPage() {
   }, [loadAndVerify]);
 
   async function handleRetry() {
-    // Always re-read storage so retry is meaningful after other tabs change data
     const fresh = getAudit(auditId);
     if (!fresh) {
       setAudit(null);
       setResult(null);
-      setMessage("აუდიტი ვერ მოიძებნა localStorage-ში");
+      setMessage(t("verifyNotFound"));
       return;
     }
     setAudit(fresh);
@@ -94,8 +91,8 @@ export default function VerifyPage() {
   if (!ready) {
     return (
       <div className="mx-auto max-w-2xl px-4 py-12 sm:px-6">
-        <h1 className="display text-4xl text-[var(--ink)]">გადამოწმება</h1>
-        <p className="mt-3 text-[var(--muted)]">იტვირთება…</p>
+        <h1 className="display text-4xl text-[var(--ink)]">{t("verifyTitle")}</h1>
+        <p className="mt-3 text-[var(--muted)]">{t("loading")}</p>
       </div>
     );
   }
@@ -103,17 +100,16 @@ export default function VerifyPage() {
   if (!audit) {
     return (
       <div className="mx-auto max-w-xl px-4 py-16">
-        <h1 className="display text-3xl">Certificate verification</h1>
+        <h1 className="display text-3xl">{t("verifyTitle")}</h1>
         <p className="mt-3 text-[var(--muted)]">
-          Audit <code>{auditId}</code> was not found in local storage on this
-          device.
+          {t("verifyNotFound")} <code>{auditId}</code>
         </p>
         <div className="mt-4 flex flex-wrap gap-2">
           <Button asChild>
-            <Link href="/audit/new">Start an audit</Link>
+            <Link href="/audit/new">{t("startAudit")}</Link>
           </Button>
           <Button asChild variant="secondary">
-            <Link href="/history">ისტორია</Link>
+            <Link href="/history">{t("navHistory")}</Link>
           </Button>
         </div>
       </div>
@@ -122,51 +118,45 @@ export default function VerifyPage() {
 
   return (
     <div className="mx-auto max-w-2xl px-4 py-12 sm:px-6">
-      <h1 className="display text-4xl text-[var(--ink)]">გადამოწმება</h1>
+      <h1 className="display text-4xl text-[var(--ink)]">{t("verifyTitle")}</h1>
       <p className="mt-2 text-[var(--muted)]">/verify/{audit.auditId}</p>
 
       {result?.isDemoMock && (
         <div className="mt-4">
-          <DemoModeBanner label="Verification used demo mock attestation" />
+          <DemoModeBanner label={t("verifyDemoBanner")} />
         </div>
       )}
 
       {result && (
-        <div className="mt-6 rounded-xl border border-[var(--line)] bg-white/90 p-5">
-          <Badge className={STATE_STYLES[result.state] ?? ""}>
-            {result.state}
-          </Badge>
+        <div className="ac-surface mt-6 rounded-xl border border-[var(--line)] p-5">
+          <Badge className={STATE_STYLES[result.state] ?? ""}>{result.state}</Badge>
           <dl className="mt-4 space-y-3 text-sm">
             <div>
-              <dt className="text-[var(--muted)]">Expected hash</dt>
-              <dd className="break-all font-mono text-xs">
-                {result.expectedHash}
-              </dd>
+              <dt className="text-[var(--muted)]">{t("expectedHash")}</dt>
+              <dd className="break-all font-mono text-xs">{result.expectedHash}</dd>
             </div>
             <div>
-              <dt className="text-[var(--muted)]">Calculated hash</dt>
-              <dd className="break-all font-mono text-xs">
-                {result.calculatedHash}
-              </dd>
+              <dt className="text-[var(--muted)]">{t("calculatedHash")}</dt>
+              <dd className="break-all font-mono text-xs">{result.calculatedHash}</dd>
             </div>
             <div>
-              <dt className="text-[var(--muted)]">Transaction signature</dt>
+              <dt className="text-[var(--muted)]">{t("txSignature")}</dt>
               <dd className="break-all font-mono text-xs">
                 {result.transactionSignature ?? "—"}
               </dd>
             </div>
             <div>
-              <dt className="text-[var(--muted)]">Wallet</dt>
+              <dt className="text-[var(--muted)]">{t("wallet")}</dt>
               <dd className="font-mono text-xs">
                 {shortAddress(result.wallet ?? "—", 6)}
               </dd>
             </div>
             <div>
-              <dt className="text-[var(--muted)]">Network</dt>
+              <dt className="text-[var(--muted)]">{t("network")}</dt>
               <dd>{result.network}</dd>
             </div>
             <div>
-              <dt className="text-[var(--muted)]">Verification time</dt>
+              <dt className="text-[var(--muted)]">{t("verificationTime")}</dt>
               <dd>{formatDateKa(result.verificationTime)}</dd>
             </div>
           </dl>
@@ -179,7 +169,7 @@ export default function VerifyPage() {
                 target="_blank"
                 rel="noreferrer"
               >
-                Open in Solana Explorer
+                {t("openExplorer")}
               </a>
             )}
 
@@ -204,13 +194,13 @@ export default function VerifyPage() {
           disabled={busy}
           variant="secondary"
         >
-          {busy ? "Verifying…" : "Retry verification"}
+          {busy ? t("verifying") : t("retryVerification")}
         </Button>
         <Button asChild variant="outline">
-          <Link href={`/audit/${audit.auditId}/certificate`}>Certificate</Link>
+          <Link href={`/audit/${audit.auditId}/certificate`}>{t("certificate")}</Link>
         </Button>
         <Button asChild variant="ghost">
-          <Link href={`/audit/${audit.auditId}/report`}>Report</Link>
+          <Link href={`/audit/${audit.auditId}/report`}>{t("report")}</Link>
         </Button>
       </div>
     </div>

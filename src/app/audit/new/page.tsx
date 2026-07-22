@@ -7,12 +7,14 @@ import { Button } from "@/components/ui/button";
 import { LimitationNotice } from "@/components/shared/notices";
 import { createDraftAudit, moveToPayment } from "@/lib/audit/pipeline";
 import { saveAudit } from "@/lib/storage/audit-store";
-import { DEMO_SITE_PATH, DEMO_SITE_LABEL } from "@/lib/types";
+import { DEMO_SITE_PATH } from "@/lib/types";
 import { getFeatureFlags } from "@/lib/config";
+import { useI18n } from "@/lib/i18n/context";
 
 export default function NewAuditPage() {
   const router = useRouter();
   const flags = getFeatureFlags();
+  const { t } = useI18n();
   const [url, setUrl] = useState(DEMO_SITE_PATH);
   const [businessName, setBusinessName] = useState("");
   const [email, setEmail] = useState("");
@@ -24,7 +26,7 @@ export default function NewAuditPage() {
     e.preventDefault();
     setError(null);
     if (!ack) {
-      setError("გთხოვთ დაადასტუროთ შეზღუდვების შესახებ.");
+      setError(t("ackRequired"));
       return;
     }
     try {
@@ -46,15 +48,13 @@ export default function NewAuditPage() {
   return (
     <div className="mx-auto max-w-2xl px-4 py-12 sm:px-6">
       <p className="text-sm font-semibold uppercase tracking-[0.18em] text-[var(--accent)]">
-        AccessChain
+        {t("brand")}
       </p>
-      <h1 className="display mt-2 text-4xl text-[var(--ink)]">ახალი აუდიტი</h1>
-      <p className="mt-3 text-[var(--muted)]">
-        მიუთითე საიტი, გადაიხადე Devnet SOL და მიიღე AI ახსნადი ანგარიში.
-      </p>
+      <h1 className="display mt-2 text-4xl text-[var(--ink)]">{t("newAuditTitle")}</h1>
+      <p className="mt-3 text-[var(--muted)]">{t("newAuditSupport")}</p>
 
       <form onSubmit={onSubmit} className="mt-8 space-y-5">
-        <label className="flex items-start gap-3 rounded-lg border border-[var(--line)] bg-white/80 p-4">
+        <label className="ac-surface flex items-start gap-3 rounded-lg border border-[var(--line)] p-4">
           <input
             type="checkbox"
             checked={useDemoSite}
@@ -65,11 +65,11 @@ export default function NewAuditPage() {
             className="mt-1"
           />
           <span>
-            <strong>{DEMO_SITE_LABEL}</strong>
+            <strong>{t("demoSiteLabel")}</strong>
             <span className="mt-1 block text-sm text-[var(--muted)]">
-              ლოკალური დემო — არ დამოკიდებულა გარე საიტებზე.{" "}
+              {t("demoSiteHelp")}{" "}
               <Link className="underline" href={DEMO_SITE_PATH}>
-                იხილე დემო
+                {t("viewDemo")}
               </Link>
             </span>
           </span>
@@ -77,51 +77,46 @@ export default function NewAuditPage() {
 
         <div>
           <label className="mb-1 block text-sm font-medium" htmlFor="url">
-            Website URL
+            {t("websiteUrl")}
           </label>
           <input
             id="url"
             value={url}
             disabled={useDemoSite}
             onChange={(e) => setUrl(e.target.value)}
-            className="h-11 w-full rounded-md border border-[var(--line)] bg-white px-3"
+            className="ac-input h-11 w-full rounded-md border border-[var(--line)] px-3"
             placeholder="https://example.com"
           />
           {!flags.enableExternalAudit && !useDemoSite && (
-            <p className="mt-1 text-xs text-[var(--warn)]">
-              External URL auditing is disabled (NEXT_PUBLIC_ENABLE_EXTERNAL_AUDIT=false).
-            </p>
+            <p className="mt-1 text-xs text-[var(--warn)]">{t("externalDisabled")}</p>
           )}
           {flags.enableExternalAudit && !useDemoSite && (
-            <p className="mt-1 text-xs text-[var(--muted)]">
-              External URLs are audited server-side with SSRF protections. If fetching
-              fails, AccessChain falls back to the bundled demo findings so the flow stays usable.
-            </p>
+            <p className="mt-1 text-xs text-[var(--muted)]">{t("externalEnabledHint")}</p>
           )}
         </div>
 
         <div>
           <label className="mb-1 block text-sm font-medium" htmlFor="biz">
-            ბიზნესის სახელი (არასავალდებულო)
+            {t("businessName")}
           </label>
           <input
             id="biz"
             value={businessName}
             onChange={(e) => setBusinessName(e.target.value)}
-            className="h-11 w-full rounded-md border border-[var(--line)] bg-white px-3"
+            className="ac-input h-11 w-full rounded-md border border-[var(--line)] px-3"
           />
         </div>
 
         <div>
           <label className="mb-1 block text-sm font-medium" htmlFor="email">
-            Email — მხოლოდ ლოკალური დემო მეტამონაცემი
+            {t("emailMeta")}
           </label>
           <input
             id="email"
             type="email"
             value={email}
             onChange={(e) => setEmail(e.target.value)}
-            className="h-11 w-full rounded-md border border-[var(--line)] bg-white px-3"
+            className="ac-input h-11 w-full rounded-md border border-[var(--line)] px-3"
           />
         </div>
 
@@ -132,10 +127,7 @@ export default function NewAuditPage() {
             onChange={(e) => setAck(e.target.checked)}
             className="mt-1"
           />
-          <span>
-            ვადასტურებ, რომ ავტომატური ტესტირება ვერ აღმოაჩენს ყველა accessibility
-            პრობლემას.
-          </span>
+          <span>{t("ackLimitations")}</span>
         </label>
 
         <LimitationNotice />
@@ -147,7 +139,7 @@ export default function NewAuditPage() {
         )}
 
         <Button type="submit" size="lg" className="w-full sm:w-auto">
-          გაგრძელება — საფულე და გადახდა
+          {t("continuePayment")}
         </Button>
       </form>
     </div>
