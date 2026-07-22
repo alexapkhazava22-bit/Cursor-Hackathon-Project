@@ -11,38 +11,75 @@ import type { AuditRecord } from "@/lib/types";
 
 export default function DeveloperFixPlanPage() {
   const params = useParams<{ id: string }>();
+  const auditId = typeof params.id === "string" ? params.id : "";
   const [audit, setAudit] = useState<AuditRecord | null>(null);
+  const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
+    if (!auditId) return;
+    let cancelled = false;
+
     async function load() {
-      let found = getAudit(params.id);
-      if (!found && params.id === "ac_demo_sample_001") {
-        const { seedSampleAudit } = await import("@/lib/audit/pipeline");
-        found = await seedSampleAudit();
-        saveAudit(found);
+      setError(null);
+      try {
+        let found = getAudit(auditId);
+        if (!found && auditId === "ac_demo_sample_001") {
+          const { seedSampleAudit } = await import("@/lib/audit/pipeline");
+          found = await seedSampleAudit();
+          saveAudit(found);
+        }
+        if (
+          found?.auditResult &&
+          (!found.explanations || found.explanations.issues.length === 0)
+        ) {
+          const mock = new MockAIProvider();
+          found = {
+            ...found,
+            explanations: await mock.explainViolations(
+              found.auditResult.violations,
+              {
+                auditedUrl: found.meta.url,
+                businessName: found.meta.businessName,
+              },
+            ),
+          };
+          saveAudit(found);
+        }
+        if (!cancelled) setAudit(found);
+      } catch (err) {
+        if (!cancelled) {
+          setError(err instanceof Error ? err.message : "Failed to load fix plan");
+        }
       }
-      if (found?.auditResult && (!found.explanations || found.explanations.issues.length === 0)) {
-        const mock = new MockAIProvider();
-        found = {
-          ...found,
-          explanations: await mock.explainViolations(found.auditResult.violations, {
-            auditedUrl: found.meta.url,
-            businessName: found.meta.businessName,
-          }),
-        };
-        saveAudit(found);
-      }
-      setAudit(found);
     }
+
     void load();
-  }, [params.id]);
+    return () => {
+      cancelled = true;
+    };
+  }, [auditId]);
+
+  if (error) {
+    return (
+      <div className="mx-auto max-w-xl px-4 py-16">
+        <p className="text-[var(--danger)]">{error}</p>
+        <Button asChild className="mt-4" variant="secondary">
+          <Link href={`/audit/${auditId}/report`} prefetch={false}>
+            უკან ანგარიშზე
+          </Link>
+        </Button>
+      </div>
+    );
+  }
 
   if (!audit?.explanations) {
     return (
       <div className="mx-auto max-w-xl px-4 py-16">
         <p>Developer fix plan ჯერ არ არის მზად.</p>
         <Button asChild className="mt-4">
-          <Link href={`/audit/${params.id}/report`}>უკან ანგარიშზე</Link>
+          <Link href={auditId ? `/audit/${auditId}/report` : "/history"} prefetch={false}>
+            უკან ანგარიშზე
+          </Link>
         </Button>
       </div>
     );
@@ -59,10 +96,14 @@ export default function DeveloperFixPlanPage() {
       </p>
       <div className="mt-6 flex gap-2">
         <Button asChild variant="secondary">
-          <Link href={`/audit/${audit.auditId}/report`}>Report</Link>
+          <Link href={`/audit/${audit.auditId}/report`} prefetch={false}>
+            Report
+          </Link>
         </Button>
         <Button asChild>
-          <Link href={`/audit/${audit.auditId}/certificate`}>Certificate</Link>
+          <Link href={`/audit/${audit.auditId}/certificate`} prefetch={false}>
+            Certificate
+          </Link>
         </Button>
       </div>
 

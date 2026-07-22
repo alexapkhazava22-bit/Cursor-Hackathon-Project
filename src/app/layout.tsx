@@ -38,7 +38,7 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="ka">
+    <html lang="ka" data-scroll-behavior="smooth">
       <body
         className={`${display.variable} ${body.variable} ${notoSansKa.variable} ${notoSerifKa.variable} pattern-grid flex min-h-screen flex-col antialiased`}
       >

@@ -1,6 +1,6 @@
 import { readFileSync } from "node:fs";
 import path from "node:path";
-import { JSDOM } from "jsdom";
+import { JSDOM, VirtualConsole } from "jsdom";
 import {
   buildDeterministicResult,
   mapAxeViolations,
@@ -23,7 +23,6 @@ type AxeWindow = Window & {
 };
 
 function loadAxeBrowserSource(): string {
-  // Resolve from project root — Next.js externals can break createRequire(import.meta.url)
   const minPath = path.join(
     process.cwd(),
     "node_modules",
@@ -34,8 +33,21 @@ function loadAxeBrowserSource(): string {
 }
 
 /**
+ * Strip scripts and inline handlers so audited pages cannot execute code.
+ * We still need runScripts:"dangerously" so our injected axe bundle can run.
+ */
+export function sanitizeHtmlForAudit(html: string): string {
+  return html
+    .replace(/<script\b[^<]*(?:(?!<\/script>)<[^<]*)*<\/script>/gi, "")
+    .replace(/<script\b[^>]*>[\s\S]*?<\/script>/gi, "")
+    .replace(/<script\b[^>]*\/>/gi, "")
+    .replace(/\son[a-z]+\s*=\s*(['"])[\s\S]*?\1/gi, "")
+    .replace(/\son[a-z]+\s*=\s*[^\s>]+/gi, "");
+}
+
+/**
  * Run axe-core against fetched HTML inside jsdom without mutating Node globals.
- * Loads axe.min.js from disk (Next bundles can strip axe.source).
+ * Page JavaScript is stripped before parse; only the injected axe bundle runs.
  */
 export async function runAxeOnHtmlString(
   html: string,
@@ -45,15 +57,25 @@ export async function runAxeOnHtmlString(
     ? auditedUrl
     : `http://localhost${auditedUrl.startsWith("/") ? auditedUrl : `/${auditedUrl}`}`;
 
-  const dom = new JSDOM(html, {
+  const virtualConsole = new VirtualConsole();
+  virtualConsole.on("jsdomError", () => undefined);
+  virtualConsole.on("error", () => undefined);
+  virtualConsole.on("warn", () => undefined);
+
+  const dom = new JSDOM(sanitizeHtmlForAudit(html), {
     url: pageUrl,
     pretendToBeVisual: true,
     runScripts: "dangerously",
+    virtualConsole,
   });
 
   try {
     const { window } = dom;
     const doc = window.document;
+
+    // Defense in depth
+    doc.querySelectorAll("script").forEach((node) => node.remove());
+
     const script = doc.createElement("script");
     script.textContent = loadAxeBrowserSource();
     doc.documentElement.appendChild(script);
@@ -76,6 +98,10 @@ export async function runAxeOnHtmlString(
       timestamp: new Date().toISOString(),
     });
   } finally {
-    dom.window.close();
+    try {
+      dom.window.close();
+    } catch {
+      // ignore
+    }
   }
 }

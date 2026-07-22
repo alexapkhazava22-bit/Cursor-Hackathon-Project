@@ -174,10 +174,20 @@ export default function ReportPage() {
         </div>
         <div className="flex flex-wrap gap-2">
           <Button asChild variant="secondary">
-            <Link href={`/audit/${audit.auditId}/developer`}>Developer Fix Plan</Link>
+            <Link
+              href={`/audit/${audit.auditId}/developer`}
+              prefetch={false}
+            >
+              Developer Fix Plan
+            </Link>
           </Button>
           <Button asChild>
-            <Link href={`/audit/${audit.auditId}/certificate`}>Certificate</Link>
+            <Link
+              href={`/audit/${audit.auditId}/certificate`}
+              prefetch={false}
+            >
+              Certificate
+            </Link>
           </Button>
         </div>
       </header>
