@@ -14,6 +14,7 @@ import type { AuditRecord } from "@/lib/types";
 
 export default function CertificatePage() {
   const params = useParams<{ id: string }>();
+  const [ready, setReady] = useState(false);
   const [audit, setAudit] = useState<AuditRecord | null>(null);
   const [qr, setQr] = useState<string | null>(null);
 
@@ -26,6 +27,7 @@ export default function CertificatePage() {
         saveAudit(found);
       }
       setAudit(found);
+      setReady(true);
     }
     void load();
   }, [params.id]);
@@ -38,6 +40,14 @@ export default function CertificatePage() {
     );
     void QRCode.toDataURL(vm.verificationUrl, { margin: 1, width: 160 }).then(setQr);
   }, [audit]);
+
+  if (!ready) {
+    return (
+      <div className="mx-auto max-w-xl px-4 py-16">
+        <p className="text-[var(--muted)]">სერტიფიკატი იტვირთება…</p>
+      </div>
+    );
+  }
 
   if (!audit?.auditResult) {
     return (

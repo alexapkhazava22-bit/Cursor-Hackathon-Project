@@ -26,6 +26,7 @@ export default function PaymentPage() {
   const config = getSolanaConfig();
   const wallet = useSolanaWallet();
   const [audit, setAudit] = useState<AuditRecord | null>(null);
+  const [ready, setReady] = useState(false);
   const [status, setStatus] = useState<"idle" | "simulating" | "pending" | "confirmed" | "failed">("idle");
   const [txSig, setTxSig] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
@@ -35,9 +36,11 @@ export default function PaymentPage() {
     const found = getAudit(params.id);
     if (!found) {
       setAudit(null);
+      setReady(true);
       return;
     }
     setAudit(moveToPayment(found));
+    setReady(true);
   }, [params.id]);
 
   const preview = useMemo(
@@ -160,6 +163,14 @@ export default function PaymentPage() {
     router.push(`/audit/${audit.auditId}/progress`);
   }
 
+  if (!ready) {
+    return (
+      <div className="mx-auto max-w-xl px-4 py-16">
+        <p className="text-[var(--muted)]">იტვირთება…</p>
+      </div>
+    );
+  }
+
   if (!audit) {
     return (
       <div className="mx-auto max-w-xl px-4 py-16">
@@ -243,11 +254,12 @@ export default function PaymentPage() {
               </p>
             )}
             <div className="mt-3 flex flex-wrap gap-2">
-              <Button variant="secondary" onClick={() => wallet.disconnect()}>
+              <Button type="button" variant="secondary" onClick={() => void wallet.disconnect()}>
                 Disconnect
               </Button>
               <Button
-                onClick={payWithWallet}
+                type="button"
+                onClick={() => void payWithWallet()}
                 disabled={
                   status === "pending" ||
                   status === "simulating" ||
@@ -265,7 +277,7 @@ export default function PaymentPage() {
           </div>
         ) : (
           <div className="flex flex-wrap gap-2">
-            <Button onClick={() => wallet.connect()} disabled={wallet.connecting}>
+            <Button type="button" onClick={() => void wallet.connect()} disabled={wallet.connecting}>
               {wallet.connecting ? "Connecting…" : "Connect Wallet"}
             </Button>
           </div>
@@ -277,7 +289,7 @@ export default function PaymentPage() {
 
       {flags.demoMode && (
         <div className="mt-4">
-          <Button variant="outline" onClick={useDemoWalletFlow}>
+          <Button type="button" variant="outline" onClick={useDemoWalletFlow}>
             Use demo wallet flow
           </Button>
         </div>
@@ -287,7 +299,7 @@ export default function PaymentPage() {
         <div className="mt-4 rounded-lg border border-[var(--danger)]/30 bg-red-50 p-4 text-sm">
           <p className="font-semibold text-[var(--danger)]">გადახდა ჩაიშალა</p>
           <p className="mt-1">{error}</p>
-          <Button className="mt-3" variant="secondary" onClick={payWithWallet}>
+          <Button type="button" className="mt-3" variant="secondary" onClick={() => void payWithWallet()}>
             Retry payment
           </Button>
         </div>

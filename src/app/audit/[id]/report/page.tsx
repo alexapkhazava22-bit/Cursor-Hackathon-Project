@@ -27,6 +27,7 @@ export default function ReportPage() {
   const config = getSolanaConfig();
   const wallet = useSolanaWallet();
   const [audit, setAudit] = useState<AuditRecord | null>(null);
+  const [ready, setReady] = useState(false);
   const [attestError, setAttestError] = useState<string | null>(null);
   const [attestBusy, setAttestBusy] = useState(false);
 
@@ -48,6 +49,7 @@ export default function ReportPage() {
         saveAudit(found);
       }
       setAudit(found);
+      setReady(true);
     }
     void load();
   }, [params.id]);
@@ -128,6 +130,14 @@ export default function ReportPage() {
     );
     saveAudit(next);
     setAudit(next);
+  }
+
+  if (!ready) {
+    return (
+      <div className="mx-auto max-w-xl px-4 py-16">
+        <p className="text-[var(--muted)]">ანგარიში იტვირთება…</p>
+      </div>
+    );
   }
 
   if (!audit || !audit.auditResult) {
@@ -410,15 +420,19 @@ export default function ReportPage() {
               </p>
               <div className="flex flex-wrap gap-2">
                 {!wallet.address && (
-                  <Button variant="secondary" onClick={() => wallet.connect()}>
+                  <Button type="button" variant="secondary" onClick={() => void wallet.connect()}>
                     Connect Wallet
                   </Button>
                 )}
-                <Button onClick={anchorHash} disabled={attestBusy || !flags.enableSolana}>
+                <Button
+                  type="button"
+                  onClick={() => void anchorHash()}
+                  disabled={attestBusy || !flags.enableSolana}
+                >
                   {attestBusy ? "Anchoring…" : "Anchor hash on Solana"}
                 </Button>
                 {flags.demoMode && (
-                  <Button variant="outline" onClick={demoAttest}>
+                  <Button type="button" variant="outline" onClick={demoAttest}>
                     Use demo attestation
                   </Button>
                 )}

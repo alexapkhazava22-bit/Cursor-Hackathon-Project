@@ -9,7 +9,9 @@ import { formatDateKa } from "@/lib/utils/cn";
 import type { AuditRecord } from "@/lib/types";
 
 export default function HistoryPage() {
+  const [ready, setReady] = useState(false);
   const [audits, setAudits] = useState<AuditRecord[]>([]);
+  const [busy, setBusy] = useState(false);
 
   function refresh() {
     setAudits(listAudits());
@@ -17,13 +19,19 @@ export default function HistoryPage() {
 
   useEffect(() => {
     refresh();
+    setReady(true);
   }, []);
 
   async function loadSample() {
-    const { seedSampleAudit } = await import("@/lib/audit/pipeline");
-    const sample = await seedSampleAudit();
-    saveAudit(sample);
-    refresh();
+    setBusy(true);
+    try {
+      const { seedSampleAudit } = await import("@/lib/audit/pipeline");
+      const sample = await seedSampleAudit();
+      saveAudit(sample);
+      refresh();
+    } finally {
+      setBusy(false);
+    }
   }
 
   function resetDemo() {
@@ -44,17 +52,27 @@ export default function HistoryPage() {
           <Button asChild>
             <Link href="/audit/new">ახალი აუდიტი</Link>
           </Button>
-          <Button variant="secondary" onClick={loadSample}>
-            Use sample audit
+          <Button
+            type="button"
+            variant="secondary"
+            disabled={busy}
+            onClick={() => void loadSample()}
+          >
+            {busy ? "Loading…" : "Use sample audit"}
           </Button>
-          <Button variant="outline" onClick={resetDemo}>
+          <Button type="button" variant="outline" onClick={resetDemo}>
             Reset demo
           </Button>
         </div>
       </div>
 
       <ul className="mt-8 space-y-3">
-        {audits.length === 0 && (
+        {!ready && (
+          <li className="rounded-xl border border-[var(--line)] bg-white/70 p-6 text-[var(--muted)]">
+            იტვირთება…
+          </li>
+        )}
+        {ready && audits.length === 0 && (
           <li className="rounded-xl border border-dashed border-[var(--line)] bg-white/70 p-6 text-[var(--muted)]">
             ჯერ არ არის აუდიტი. დაიწყეთ ახალი ან ჩატვირთეთ sample audit.
           </li>
