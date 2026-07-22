@@ -72,8 +72,10 @@ export default function InaccessibleDemoPage() {
         />
 
         <p style={{ marginTop: 32, fontSize: 13, color: "#666" }}>
-          This page is the primary AccessChain audit target. Open{" "}
-          <a href="/audit/new">New Audit</a> and select the demo site.
+          This page is the primary AccessChain audit target. For a document{" "}
+          <em>without</em> <code>lang</code>, open{" "}
+          <a href="/demo/inaccessible.html">/demo/inaccessible.html</a>. Start an
+          audit from <a href="/audit/new">New Audit</a>.
         </p>
       </div>
     </div>

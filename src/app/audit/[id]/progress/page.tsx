@@ -33,19 +33,29 @@ export default function ProgressPage() {
 
   useEffect(() => {
     if (!audit) return;
-    if (
-      audit.state !== "PAYMENT_CONFIRMED" &&
-      audit.state !== "AUDIT_RUNNING" &&
-      !(audit.isDemoFlow && audit.payment)
-    ) {
-      if (
-        audit.state === "ATTESTATION_REQUIRED" ||
-        audit.state === "VERIFIED" ||
-        audit.state === "HASH_CREATED" ||
-        audit.state === "AUDIT_COMPLETE"
-      ) {
-        router.replace(`/audit/${audit.auditId}/report`);
-      }
+
+    const alreadyDone = [
+      "AUDIT_COMPLETE",
+      "HASH_CREATED",
+      "ATTESTATION_REQUIRED",
+      "ATTESTATION_PENDING",
+      "VERIFIED",
+    ].includes(audit.state);
+
+    if (alreadyDone) {
+      router.replace(`/audit/${audit.auditId}/report`);
+      return;
+    }
+
+    const canRun =
+      audit.state === "PAYMENT_CONFIRMED" ||
+      audit.state === "AUDIT_RUNNING" ||
+      (audit.isDemoFlow &&
+        audit.payment &&
+        (audit.payment.status === "confirmed" ||
+          audit.payment.status === "demo_mock"));
+
+    if (!canRun) {
       return;
     }
 
@@ -56,7 +66,13 @@ export default function ProgressPage() {
         await delay(400);
         if (cancelled) return;
         setStep(1);
-        let next = await runAuditPipeline(audit);
+        let next = await runAuditPipeline({
+          ...audit,
+          state:
+            audit.state === "PAYMENT_CONFIRMED" || audit.state === "AUDIT_RUNNING"
+              ? audit.state
+              : "PAYMENT_CONFIRMED",
+        });
         if (cancelled) return;
         setStep(2);
         await delay(350);
@@ -77,7 +93,7 @@ export default function ProgressPage() {
     return () => {
       cancelled = true;
     };
-    // intentionally run once when audit id is ready
+    // intentionally run once when audit id / gate state is ready
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [audit?.auditId, audit?.state]);
 
