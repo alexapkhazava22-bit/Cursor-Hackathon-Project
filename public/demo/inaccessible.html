@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <title>AccessChain Demo Shop — Intentionally Inaccessible</title>
+    <style>
+      body { font-family: Georgia, serif; max-width: 880px; margin: 0 auto; padding: 1.5rem 1rem 3rem; background: #eef7f6; color: #0f1c1e; }
+      .low-contrast { color: #c8c8c8; background: #ededed; padding: 12px; border-radius: 8px; }
+      .fake-link { color: blue; text-decoration: underline; cursor: pointer; margin-top: 24px; }
+      .empty-btn { width: 40px; height: 40px; margin-left: 8px; border-radius: 8px; }
+      .hero {
+        margin-top: 16px; min-height: 260px; border-radius: 16px; color: #fff; padding: 2rem 1.5rem;
+        background: linear-gradient(135deg, #0b5f63, #1a8f7a);
+        box-shadow: 0 18px 40px rgba(15,28,30,.18);
+      }
+      .chip { display: inline-block; background: #f0c75e; color: #0f1c1e; font-size: 12px; font-weight: 600; padding: 6px 10px; border-radius: 8px; margin: 4px 4px 0 0; }
+      .note { color: #888; font-size: 12px; }
+    </style>
+  </head>
+  <body>
+    <p class="note">AccessChain bundled demo — intentionally inaccessible. Do not copy these patterns.</p>
+    <h1>დემო მაღაზია</h1>
+    <h4 class="skipped-heading">ფასები</h4>
+    <div class="hero">
+      <p style="opacity:.8;font-size:13px">Home · New Collection</p>
+      <h2 style="margin:8px 0 0">ახალი კოლექცია 2026</h2>
+      <p>ხელნაკეთი პროდუქტები თბილისიდან — მიწოდება მთელ საქართველოში</p>
+      <span class="chip">უფასო მიწოდება</span>
+      <span class="chip">24/7 მხარდაჭერა</span>
+      <span class="chip">უსაფრთხო გადახდა</span>
+    </div>
+    <img src="/demo-hero.svg" />
+    <p class="low-contrast">მნიშვნელოვანი ინფორმაცია თითქმის უხილავია</p>
+    <form style="margin-top:24px">
+      <input name="email" type="email" placeholder="ელფოსტა" />
+      <button class="empty-btn" type="button"></button>
+    </form>
+    <div class="fake-link" onclick="alert('clicked')">დაწკაპუნეთ აქ</div>
+    <p style="margin-top:32px;font-size:13px;color:#666">
+      Interactive auto-carousel lives at <a href="/demo/inaccessible">/demo/inaccessible</a>.
+      <a href="/audit/new">Start audit</a>
+    </p>
+  </body>
+</html>
