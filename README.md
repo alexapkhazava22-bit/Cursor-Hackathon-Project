@@ -49,7 +49,7 @@ npm run build
 | `NEXT_PUBLIC_DEMO_MODE` | `true` | Mock wallet/attestation helpers |
 | `NEXT_PUBLIC_ENABLE_SOLANA` | `true` | Real wallet signing enabled |
 | `NEXT_PUBLIC_ENABLE_REAL_AI` | `false` | Uses `MockAIProvider` by default |
-| `NEXT_PUBLIC_ENABLE_EXTERNAL_AUDIT` | `false` | Bundled demo only |
+| `NEXT_PUBLIC_ENABLE_EXTERNAL_AUDIT` | `true` | Safe server-side external URL audits (demo fallback on failure) |
 
 ## Architecture modules
 

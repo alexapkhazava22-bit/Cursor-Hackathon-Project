@@ -1,3 +1,5 @@
+import { FakeClickableLink } from "@/components/demo/fake-clickable-link";
+
 export const metadata = {
   title: "Demo Inaccessible Site — AccessChain",
   description: "Intentionally inaccessible local demo website for AccessChain audits.",
@@ -6,7 +8,7 @@ export const metadata = {
 /**
  * Intentionally inaccessible demo page for axe-core.
  * Contains: missing alt, low contrast, unlabeled input, empty button,
- * broken heading hierarchy, missing document language (via iframe note — page itself sets lang=und intentionally via attribute override),
+ * broken heading hierarchy, missing document language,
  * keyboard-inaccessible interactive element.
  */
 export default function InaccessibleDemoPage() {
@@ -29,8 +31,6 @@ export default function InaccessibleDemoPage() {
         <h1>დემო მაღაზია</h1>
         <h4 className="skipped-heading">ფასები</h4>
 
-        {/* Missing image alt */}
-        {/* eslint-disable-next-line @next/next/no-img-element */}
         {/* Missing alt text — intentional */}
         {/* eslint-disable-next-line @next/next/no-img-element */}
         <img
@@ -52,24 +52,8 @@ export default function InaccessibleDemoPage() {
           <button className="empty-btn" type="button" style={{ marginLeft: 8, width: 40, height: 32 }} />
         </form>
 
-        {/* Keyboard-inaccessible interactive element (inline handler via script for SSR safety) */}
-        <div
-          className="fake-link"
-          data-demo-clickable="true"
-          style={{
-            marginTop: 24,
-            color: "blue",
-            textDecoration: "underline",
-            cursor: "pointer",
-          }}
-        >
-          დაწკაპუნეთ აქ
-        </div>
-        <script
-          dangerouslySetInnerHTML={{
-            __html: `document.querySelector('[data-demo-clickable]')?.addEventListener('click',function(){alert('clicked')});`,
-          }}
-        />
+        {/* Keyboard-inaccessible interactive element */}
+        <FakeClickableLink>დაწკაპუნეთ აქ</FakeClickableLink>
 
         <p style={{ marginTop: 32, fontSize: 13, color: "#666" }}>
           This page is the primary AccessChain audit target. For a document{" "}

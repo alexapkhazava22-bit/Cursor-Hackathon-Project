@@ -141,13 +141,59 @@ export async function runAuditPipeline(
       : forceState(audit, "AUDIT_RUNNING");
 
   const auditedUrl = next.meta.url;
-  const auditResult = getDeterministicDemoAudit(
+  let auditResult = getDeterministicDemoAudit(
     auditedUrl.startsWith("/demo/") ? auditedUrl : DEMO_SITE_PATH,
     new Date().toISOString(),
   );
 
+  // External URL path: call server audit API; fall back to demo on any failure
+  if (
+    flags.enableExternalAudit &&
+    !auditedUrl.startsWith("/demo/") &&
+    !next.meta.useDemoSite
+  ) {
+    try {
+      const origin =
+        typeof window !== "undefined"
+          ? window.location.origin
+          : process.env.NEXT_PUBLIC_APP_URL ?? "http://localhost:3000";
+      const response = await fetch(`${origin}/api/audit`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ url: auditedUrl }),
+      });
+      const payload = (await response.json()) as {
+        result?: typeof auditResult;
+        fallback?: typeof auditResult;
+        error?: string;
+        usedFallback?: boolean;
+      };
+      if (payload.result) {
+        auditResult = payload.result;
+      } else if (payload.fallback) {
+        auditResult = {
+          ...payload.fallback,
+          auditedUrl,
+          limitations: [
+            ...(payload.fallback.limitations ?? []),
+            `External audit unavailable (${payload.error ?? "unknown error"}); showing bundled demo findings for continuity.`,
+          ],
+        };
+      }
+    } catch {
+      auditResult = {
+        ...auditResult,
+        auditedUrl,
+        limitations: [
+          ...auditResult.limitations,
+          "External audit request failed; using bundled demo findings so the demo remains usable.",
+        ],
+      };
+    }
+  }
+
   const explanations = await explainWithFallback(auditResult.violations, {
-    auditedUrl,
+    auditedUrl: auditResult.auditedUrl,
     businessName: next.meta.businessName,
   });
 

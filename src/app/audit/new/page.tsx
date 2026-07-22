@@ -92,6 +92,12 @@ export default function NewAuditPage() {
               External URL auditing is disabled (NEXT_PUBLIC_ENABLE_EXTERNAL_AUDIT=false).
             </p>
           )}
+          {flags.enableExternalAudit && !useDemoSite && (
+            <p className="mt-1 text-xs text-[var(--muted)]">
+              External URLs are audited server-side with SSRF protections. If fetching
+              fails, AccessChain falls back to the bundled demo findings so the flow stays usable.
+            </p>
+          )}
         </div>
 
         <div>
