@@ -1,0 +1,29 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <title>AccessChain Demo — Intentionally Inaccessible</title>
+    <style>
+      body { font-family: Georgia, serif; max-width: 720px; margin: 0 auto; padding: 2rem 1rem; }
+      .low-contrast { color: #c8c8c8; background: #ededed; padding: 12px; }
+      .fake-link { color: blue; text-decoration: underline; cursor: pointer; margin-top: 24px; }
+      .empty-btn { width: 40px; height: 32px; margin-left: 8px; }
+    </style>
+  </head>
+  <body>
+    <p style="color:#888;font-size:12px">AccessChain bundled demo — intentionally inaccessible. Do not copy these patterns.</p>
+    <h1>დემო მაღაზია</h1>
+    <h4 class="skipped-heading">ფასები</h4>
+    <img src="/demo-hero.svg" />
+    <p class="low-contrast">მნიშვნელოვანი ინფორმაცია თითქმის უხილავია</p>
+    <form style="margin-top:24px">
+      <input name="email" type="email" placeholder="ელფოსტა" />
+      <button class="empty-btn" type="button"></button>
+    </form>
+    <div class="fake-link" onclick="alert('clicked')">დაწკაპუნეთ აქ</div>
+    <p style="margin-top:32px;font-size:13px;color:#666">
+      Primary AccessChain audit target.
+      <a href="/audit/new">Start audit</a>
+    </p>
+  </body>
+</html>
